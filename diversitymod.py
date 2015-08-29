@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import shutil, os, ConfigParser
 from string import ascii_uppercase, digits
 from Tkinter import *
@@ -11,28 +13,29 @@ from subprocess import call
 ## Get Steam path ( lines from http://code.activestate.com/recipes/578689-get-a-value-un-windows-registry/ )
 ##
 
-import _winreg
+# import _winreg
 
-def regkey_value(path, name="", start_key = None):
-    if isinstance(path, str):
-        path = path.split("\\")
-    if start_key is None:
-        start_key = getattr(_winreg, path[0])
-        return regkey_value(path[1:], name, start_key)
-    else:
-        subkey = path.pop(0)
-    with _winreg.OpenKey(start_key, subkey) as handle:
-        assert handle
-        if path:
-            return regkey_value(path, name, handle)
-        else:
-            desc, i = None, 0
-            while not desc or desc[0] != name:
-                desc = _winreg.EnumValue(handle, i)
-                i += 1
-            return desc[1]
+# def regkey_value(path, name="", start_key = None):
+#     if isinstance(path, str):
+#         path = path.split("\\")
+#     if start_key is None:
+#         start_key = getattr(_winreg, path[0])
+#         return regkey_value(path[1:], name, start_key)
+#     else:
+#         subkey = path.pop(0)
+#     with _winreg.OpenKey(start_key, subkey) as handle:
+#         assert handle
+#         if path:
+#             return regkey_value(path, name, handle)
+#         else:
+#             desc, i = None, 0
+#             while not desc or desc[0] != name:
+#                 desc = _winreg.EnumValue(handle, i)
+#                 i += 1
+#             return desc[1]
 
-SteamPath = regkey_value(r"HKEY_CURRENT_USER\Software\Valve\Steam", "SteamPath")
+# SteamPath = regkey_value(r"HKEY_CURRENT_USER\Software\Valve\Steam", "SteamPath")
+SteamPath = ""
 
 ##
 ## end of copied stuff
@@ -192,18 +195,19 @@ def installDiversityMod():
 	# if Rebirth is running, kill it (returns an ugly error if Rebirth is not running, but just ignore it I guess)
 #	try:
 #		print("Attempting to kill Isaac ...\n")
-	call(['taskkill', '/im', 'isaac-ng.exe', '/f'])
+	# call(['taskkill', '/im', 'isaac-ng.exe', '/f'])
+        os.system('pkill isaac.x64')
 #	except OSError:
 #		print("There was an error closing Rebirth.")
 
 	# re/start Rebirth
 #	try:
-	if os.path.exists(resourcepath+"/../../../../steam.exe"):
-#			print("Found steam ...")
-		call([resourcepath + '/../../../../steam.exe', '-applaunch', '250900'])
-	elif os.path.exists(resourcepath + "/../isaac-ng.exe"):
+	if os.path.exists(resourcepath+"/../../../../ubuntu12_32/steam"):
+                print("Found steam ...")
+		call([resourcepath + '/../../../../ubuntu12_32/steam', '-applaunch', '250900'])
+	elif os.path.exists(resourcepath + "/../run-x64.sh"):
 #			print("No Steam, but found isaac-ng.exe ...")
-		call(resourcepath + '/../isaac-ng.exe')
+		call(resourcepath + '/../run-x64.sh')
 #	except OSError:
 #		print("Starting Rebirth failed.\nPress Enter to close.")
 	
@@ -229,16 +233,16 @@ def closeDiversityMod():
 def setcustompath():
 	# open file dialog
 	isaacpath = askopenfilename()
-	# check that the file is isaac-ng.exe and the path is good
-	if isaacpath [-12:] == "isaac-ng.exe" and os.path.exists(isaacpath[0:-12] + 'resources'):
+	# check that the file is run-x64.sh and the path is good
+	if isaacpath [-10:] == "run-x64.sh" and os.path.exists(isaacpath[0:-10] + 'resources'):
 		if not customs.has_section('options'):
 			customs.add_section('options')
-		customs.set('options', 'custompath', isaacpath [0:-12] + 'resources')
+		customs.set('options', 'custompath', isaacpath [0:-10] + 'resources')
 		with open('options.ini', 'wb') as configfile:
 			customs.write(configfile)
 		feedback.set("Your Diversity Mod path has been correctly set.\nClose this window and restart Diversity Mod.")
 	else:
-		feedback.set("That file appears to be incorrect. Please try again to find isaac-ng.exe")
+		feedback.set("That file appears to be incorrect. Please try again to find run-x64.sh")
 	dm.update_idletasks()
 
 def checkInstalled(*args):
@@ -259,7 +263,7 @@ entryseed.trace("w", checkInstalled)
 feedback = StringVar()
 d6start = BooleanVar()
 # just the gui icon and title
-dm.iconbitmap("diversitymod files/poop.ico")
+dm.iconbitmap('@diversitymod files/poop.xbm')
 dm.title("Diversity Mod v" + str(version))
 
 # import options
